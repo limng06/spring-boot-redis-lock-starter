@@ -1,12 +1,9 @@
 package org.springframework.boot.autoconfigure.redislock.core;
 
-import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.JoinPoint;
 import org.springframework.boot.autoconfigure.redislock.annotation.DistributeLock;
 import org.springframework.boot.autoconfigure.redislock.config.RedisLockConfig;
 import org.springframework.boot.autoconfigure.redislock.entity.LockInfo;
-import org.springframework.boot.autoconfigure.redislock.enums.LockScope;
-
-import java.util.HashMap;
 
 public class LockInfoGenerator {
     LockKeyGenerator lockKeyGenerator;
@@ -18,7 +15,7 @@ public class LockInfoGenerator {
     }
 
 
-    public LockInfo generate(ProceedingJoinPoint point, DistributeLock lock) {
+    public LockInfo generate(JoinPoint point, DistributeLock lock) {
         LockInfo lockInfo = new LockInfo();
         lockInfo.setType(lock.lockType());
         lockInfo.setScope(lock.scope());

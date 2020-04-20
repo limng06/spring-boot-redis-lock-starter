@@ -10,7 +10,7 @@ public class LockInfo implements Serializable {
     private LockType type;
     private String name;
     private long waitTime;
-    private long maxTime;
+    private long leaseTime;
 
     public LockType getType() {
         return type;
@@ -36,12 +36,12 @@ public class LockInfo implements Serializable {
         this.waitTime = waitTime;
     }
 
-    public long getMaxTime() {
-        return maxTime;
+    public long getLeaseTime() {
+        return leaseTime;
     }
 
-    public void setMaxTime(long maxTime) {
-        this.maxTime = maxTime;
+    public void setLeaseTime(long leaseTime) {
+        this.leaseTime = leaseTime;
     }
 
     public LockScope getScope() {

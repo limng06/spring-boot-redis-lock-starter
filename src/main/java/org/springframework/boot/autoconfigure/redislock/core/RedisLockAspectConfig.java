@@ -12,37 +12,52 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.redislock.annotation.DistributeLock;
 import org.springframework.boot.autoconfigure.redislock.entity.LockInfo;
+import org.springframework.boot.autoconfigure.redislock.handler.DistributeLockInvocationException;
+import org.springframework.boot.autoconfigure.redislock.lock.Lock;
+import org.springframework.boot.autoconfigure.redislock.lock.LockFacotry;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Aspect
 @Component
 @Order(0)
 public class RedisLockAspectConfig {
     private static final Logger logger = LoggerFactory.getLogger(RedisLockAspectConfig.class);
+    private final Map<String, LockRes> currentThreadLock = new ConcurrentHashMap<>();
     @Autowired
     LockInfoGenerator lockInfoGenerator;
+    @Autowired
+    LockFacotry lockFacotry;
 
     @Around(value = "@annotation(distributeLock)")
     public Object around(ProceedingJoinPoint point, DistributeLock distributeLock) throws Throwable {
-        Object result = null;
         // 获取 lockInfo 信息
         LockInfo lockInfo = lockInfoGenerator.generate(point, distributeLock);
         //
-        try {
-            // try GetLock
+        String curentLock = this.getCurrentLockId(point, distributeLock);
+        currentThreadLock.put(curentLock, new LockRes(lockInfo, false));
+        Lock lock = lockFacotry.get(lockInfo);
+        boolean result = lock.acquire();
+        if (!result) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("Timeout while acquiring Lock({})", lockInfo.getName());
+            }
 
-        } catch (Exception e) {
-            throw e;
-        } finally {
+            distributeLock.lockTimeoutStrategy().handle(lockInfo, lock, point);
 
         }
-        result = point.proceed();
-        return result;
+
+        currentThreadLock.get(curentLock).setLock(lock);
+        currentThreadLock.get(curentLock).setRes(true);
+
+        return point.proceed();
     }
 
     @AfterReturning(value = "@annotation(lock)")
@@ -121,7 +136,7 @@ public class RedisLockAspectConfig {
      * @return
      */
     private String getCurrentLockId(JoinPoint joinPoint, DistributeLock lock) {
-        LockInfo lockInfo = lockInfoProvider.get(joinPoint, lock);
+        LockInfo lockInfo = lockInfoGenerator.generate(joinPoint, lock);
         String curentLock = Thread.currentThread().getId() + lockInfo.getName();
         return curentLock;
     }
@@ -130,19 +145,10 @@ public class RedisLockAspectConfig {
      * 处理释放锁时已超时
      */
     private void handleReleaseTimeout(DistributeLock lock, LockInfo lockInfo, JoinPoint joinPoint) throws Throwable {
-
         if (logger.isWarnEnabled()) {
             logger.warn("Timeout while release Lock({})", lockInfo.getName());
         }
-
-        if (!StringUtils.isEmpty(lock.customReleaseTimeoutStrategy())) {
-
-            handleCustomReleaseTimeout(lock.customReleaseTimeoutStrategy(), joinPoint);
-
-        } else {
-            lock.releaseTimeoutStrategy().handle(lockInfo);
-        }
-
+        lock.releaseTimeoutStrategy().handle(lockInfo);
     }
 
     /**

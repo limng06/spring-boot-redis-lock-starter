@@ -1,5 +1,14 @@
 package org.springframework.boot.autoconfigure.redislock.enums;
 
 public enum LockType {
-    Fair;
+
+    /**
+     * 公平锁
+     */
+    Fair,
+
+    /**
+     * 可重入锁，默认
+     */
+    Reetrant;
 }

@@ -11,11 +11,14 @@ public class LockFacotry {
     }
 
     public Lock get(LockInfo lockInfo) {
-
         switch (lockInfo.getType()) {
-            case Fair:
+            case Fair: {
                 return new FairLock(redissonClient, lockInfo);
+            }
+            default:
+            {
+                return new ReentrantLock(redissonClient, lockInfo);
+            }
         }
-        return null;
     }
 }

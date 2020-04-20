@@ -7,20 +7,24 @@ import org.springframework.boot.autoconfigure.redislock.entity.LockInfo;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-public class FairLock implements Lock {
+/**
+ * @author limng
+ * 默认使用锁
+ */
+public class ReentrantLock implements Lock {
     private final LockInfo lockInfo;
     private RLock rLock;
     private RedissonClient redissonClient;
 
-    public FairLock(RedissonClient redissonClient, LockInfo info) {
+    public ReentrantLock(RedissonClient redissonClient, LockInfo lockInfo) {
         this.redissonClient = redissonClient;
-        this.lockInfo = info;
+        this.lockInfo = lockInfo;
     }
 
     @Override
     public boolean acquire() {
         try {
-            rLock = redissonClient.getFairLock(lockInfo.getName());
+            rLock = redissonClient.getLock(lockInfo.getName());
             return rLock.tryLock(lockInfo.getWaitTime(), lockInfo.getLeaseTime(), TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             return false;
@@ -30,7 +34,6 @@ public class FairLock implements Lock {
     @Override
     public boolean release() {
         if (rLock.isHeldByCurrentThread()) {
-
             try {
                 return rLock.forceUnlockAsync().get();
             } catch (InterruptedException e) {
@@ -40,5 +43,9 @@ public class FairLock implements Lock {
             }
         }
         return false;
+    }
+
+    public String getKey() {
+        return this.lockInfo.getName();
     }
 }
