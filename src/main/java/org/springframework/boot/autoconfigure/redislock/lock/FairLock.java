@@ -21,7 +21,7 @@ public class FairLock implements Lock {
     public boolean acquire() {
         try {
             rLock = redissonClient.getFairLock(lockInfo.getName());
-            return rLock.tryLock(lockInfo.getWaitTime(), lockInfo.getLeaseTime(), TimeUnit.SECONDS);
+            return rLock.tryLock(lockInfo.getWaitTime(), lockInfo.getLeaseTime(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             return false;
         }

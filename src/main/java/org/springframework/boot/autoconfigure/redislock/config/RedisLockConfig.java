@@ -5,8 +5,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = RedisLockConfig.PREFIX)
 public class RedisLockConfig {
     public static final String PREFIX = "spring.redis-lock";
-    private long waitTime = 60;
-    private long leaseTime = 60;
+    /**
+     * 默认等待2S时间 获取不到就返回异常*/
+    private long waitTime = 2000;
+    /**
+     * 默认9秒自动释放锁*/
+    private long leaseTime = 9000;
 
     public long getWaitTime() {
         return waitTime;
