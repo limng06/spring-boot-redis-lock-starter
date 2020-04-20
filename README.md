@@ -8,4 +8,6 @@
 
 **添加LockScope 默认为KEY，添加Function方式，直接锁定方法和其参数，防止分布式服务重复调用**
 
+**直接使用reedission starter**
 
+**仅限个人学习使用**
