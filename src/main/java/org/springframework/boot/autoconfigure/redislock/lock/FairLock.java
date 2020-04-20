@@ -7,6 +7,10 @@ import org.springframework.boot.autoconfigure.redislock.entity.LockInfo;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @Author liming
+ * 公平-可重入锁
+ * */
 public class FairLock implements Lock {
     private final LockInfo lockInfo;
     private RLock rLock;

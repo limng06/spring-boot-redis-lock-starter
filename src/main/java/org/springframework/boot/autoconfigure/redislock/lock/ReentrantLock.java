@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author limng
- * 默认使用锁
+ * 非公平-可重入锁
  */
 public class ReentrantLock implements Lock {
     private final LockInfo lockInfo;
