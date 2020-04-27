@@ -23,7 +23,7 @@ public @interface DistributeLock {
 
     String prefix() default "Key:";
 
-    String key();
+    String key() default "";
 
     /**
      * 尝试加锁，最多等待时间
