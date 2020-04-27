@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Import;
 @ConditionalOnProperty(prefix = RedisLockConfig.PREFIX, name = "enable", havingValue = "true", matchIfMissing = true)
 @AutoConfigureAfter(RedisAutoConfiguration.class)
 @EnableConfigurationProperties(RedisLockConfig.class)
-@Import({RedisLockAspectConfig.class})
+@Import({RedisLockAspectConfig.class, RedisLockConfiguration.class})
 public class RedisLockAutoConfiguration {
 
 }
