@@ -25,6 +25,20 @@ public @interface DistributeLock {
 
     String key();
 
+    /**
+     * 尝试加锁，最多等待时间
+     *
+     * @return waitTime
+     */
+    long waitTime() default Long.MIN_VALUE;
+
+    /**
+     * 上锁以后xxx秒自动解锁
+     *
+     * @return leaseTime
+     */
+    long leaseTime() default Long.MIN_VALUE;
+
     LockTimeoutStrategy lockTimeoutStrategy() default LockTimeoutStrategy.FAST_FAILURE;
 
     ReleaseTimeoutStrategy releaseTimeoutStrategy() default ReleaseTimeoutStrategy.NO_OPERATION;

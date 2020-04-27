@@ -29,7 +29,8 @@ public class ReentrantLock implements Lock {
         try {
             logger.info("trying to get lock" + lockInfo.getName());
             rLock = redissonClient.getLock(lockInfo.getName());
-            return rLock.tryLock(lockInfo.getWaitTime(), lockInfo.getLeaseTime(), TimeUnit.MILLISECONDS);
+            boolean accRes = rLock.tryLock(lockInfo.getWaitTime(), lockInfo.getLeaseTime(), TimeUnit.MILLISECONDS);
+            return accRes;
         } catch (InterruptedException e) {
             return false;
         }

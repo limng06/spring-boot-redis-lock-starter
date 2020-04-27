@@ -9,8 +9,8 @@ public class RedisLockConfig {
      * 默认等待2S时间 获取不到就返回异常*/
     private long waitTime = 2000;
     /**
-     * 默认9秒自动释放锁*/
-    private long leaseTime = 9000;
+     * 默认30 秒自动释放锁*/
+    private long leaseTime = 30000;
 
     public long getWaitTime() {
         return waitTime;

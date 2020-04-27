@@ -14,13 +14,18 @@ public class LockInfoGenerator {
         this.lockKeyGenerator = lockKeyGenerator;
     }
 
-
     public LockInfo generate(JoinPoint point, DistributeLock lock) {
         LockInfo lockInfo = new LockInfo();
         lockInfo.setType(lock.lockType());
         lockInfo.setScope(lock.scope());
         String name = lockKeyGenerator.getKeyName(point, lock);
         lockInfo.setName(name);
+        if (lock.waitTime() == Long.MIN_VALUE) {
+            lockInfo.setWaitTime(redisLockConfig.getWaitTime());
+        }
+        if (lock.leaseTime() == Long.MIN_VALUE) {
+            lockInfo.setLeaseTime(redisLockConfig.getLeaseTime());
+        }
         return lockInfo;
     }
 }
