@@ -27,7 +27,7 @@ public class ReentrantLock implements Lock {
     @Override
     public boolean acquire() {
         try {
-            logger.info("trying to get lock" + rLock.getName());
+            logger.info("trying to get lock" + lockInfo.getName());
             rLock = redissonClient.getLock(lockInfo.getName());
             return rLock.tryLock(lockInfo.getWaitTime(), lockInfo.getLeaseTime(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
@@ -39,7 +39,7 @@ public class ReentrantLock implements Lock {
     public boolean release() {
         if (rLock.isHeldByCurrentThread()) {
             try {
-                logger.info("trying to release lock" + rLock.getName());
+                logger.info("trying to release lock" + lockInfo.getName());
                 return rLock.forceUnlockAsync().get();
             } catch (InterruptedException e) {
                 logger.error("ReentrantLock release InterruptedException", e);
