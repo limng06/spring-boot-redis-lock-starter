@@ -10,6 +10,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.redislock.annotation.DistributeFuncLock;
 import org.springframework.boot.autoconfigure.redislock.annotation.DistributeLock;
 import org.springframework.boot.autoconfigure.redislock.entity.LockInfo;
 import org.springframework.boot.autoconfigure.redislock.handler.DistributeLockInvocationException;
@@ -36,7 +37,51 @@ public class RedisLockAspectConfig {
     LockFacotry lockFacotry;
 
     @Around(value = "@annotation(distributeLock)")
-    public Object around(ProceedingJoinPoint point, DistributeLock distributeLock) throws Throwable {
+    public Object aroundDistributeLock(ProceedingJoinPoint point, DistributeLock distributeLock) throws Throwable {
+        return around(point, distributeLock);
+    }
+
+    @AfterReturning(value = "@annotation(lock) || @annotation(lock)")
+    public void afterReturning(JoinPoint joinPoint, DistributeLock lock) throws Throwable {
+        String curentLock = this.getCurrentLockId(joinPoint, lock);
+        releaseLock(lock, joinPoint, curentLock);
+        cleanUpThreadLocal(curentLock);
+    }
+
+    @AfterThrowing(value = "@annotation(lock)|| @annotation(lock)", throwing = "ex")
+    public void afterThrowing(JoinPoint joinPoint, DistributeLock lock, Throwable ex) throws Throwable {
+        String curentLock = this.getCurrentLockId(joinPoint, lock);
+        releaseLock(lock, joinPoint, curentLock);
+        cleanUpThreadLocal(curentLock);
+        throw ex;
+    }
+
+    @Around(value = "@annotation(distributeFuncLock)")
+    public Object aroundDistributeFuncLock(ProceedingJoinPoint point, DistributeFuncLock distributeFuncLock) throws Throwable {
+        DistributeLock distributeLock = distributeFuncLock.annotationType().getAnnotation(DistributeLock.class);
+        // 获取 lockInfo 信息
+        return around(point, distributeLock);
+    }
+
+    @AfterReturning(value = "@annotation(lock)")
+    public void afterReturningDistributeFuncLock(JoinPoint joinPoint, DistributeFuncLock lock) throws Throwable {
+        releaseDistributeFuncLock(joinPoint, lock);
+    }
+
+    @AfterThrowing(value = "@annotation(lock)", throwing = "ex")
+    public void afterThrowingDistributeFuncLock(JoinPoint joinPoint, DistributeFuncLock lock, Throwable ex) throws Throwable {
+        releaseDistributeFuncLock(joinPoint, lock);
+        throw ex;
+    }
+
+    private void releaseDistributeFuncLock(JoinPoint joinPoint, DistributeFuncLock lock) throws Throwable {
+        DistributeLock distributeLock = lock.annotationType().getAnnotation(DistributeLock.class);
+        String curentLock = this.getCurrentLockId(joinPoint, distributeLock);
+        releaseLock(distributeLock, joinPoint, curentLock);
+        cleanUpThreadLocal(curentLock);
+    }
+
+    private Object around(ProceedingJoinPoint point, DistributeLock distributeLock) throws Throwable {
         // 获取 lockInfo 信息
         LockInfo lockInfo = lockInfoGenerator.generate(point, distributeLock);
         //
@@ -57,21 +102,6 @@ public class RedisLockAspectConfig {
         currentThreadLock.get(curentLock).setRes(true);
 
         return point.proceed();
-    }
-
-    @AfterReturning(value = "@annotation(lock)")
-    public void afterReturning(JoinPoint joinPoint, DistributeLock lock) throws Throwable {
-        String curentLock = this.getCurrentLockId(joinPoint, lock);
-        releaseLock(lock, joinPoint, curentLock);
-        cleanUpThreadLocal(curentLock);
-    }
-
-    @AfterThrowing(value = "@annotation(lock)", throwing = "ex")
-    public void afterThrowing(JoinPoint joinPoint, DistributeLock lock, Throwable ex) throws Throwable {
-        String curentLock = this.getCurrentLockId(joinPoint, lock);
-        releaseLock(lock, joinPoint, curentLock);
-        cleanUpThreadLocal(curentLock);
-        throw ex;
     }
 
     /**
