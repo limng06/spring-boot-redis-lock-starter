@@ -1,6 +1,7 @@
 package org.springframework.boot.autoconfigure.redislock;
 
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.redislock.config.RedisLockConfig;
 import org.springframework.boot.autoconfigure.redislock.core.LockKeyGenerator;
 import org.springframework.boot.autoconfigure.redislock.lock.LockFacotry;
@@ -11,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RedisLockConfiguration {
-
     @Bean
     public LockInfoGenerator lockInfoGenerator(RedisLockConfig redisLockConfig, LockKeyGenerator lockKeyGenerator) {
         return new LockInfoGenerator(redisLockConfig, lockKeyGenerator);
@@ -23,8 +23,7 @@ public class RedisLockConfiguration {
     }
 
     @Bean
-    public LockFacotry lockFacotry() {
-        RedissonClient redissonClient = ApplicationContextHelper.getBean(RedissonClient.class);
+    public LockFacotry lockFacotry(RedissonClient redissonClient) {
         return new LockFacotry(redissonClient);
     }
 

@@ -19,7 +19,7 @@ import java.lang.annotation.*;
 public @interface DistributeLock {
     LockScope scope() default LockScope.Key;
 
-    LockType lockType() default LockType.Fair;
+    LockType lockType() default LockType.Reetrant;
 
     String prefix() default "Key:";
 
