@@ -11,15 +11,21 @@ import java.lang.annotation.*;
 /**
  * Created by 黎明 on 2018/12/13.
  */
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Inherited
 @Order(1)
 public @interface DistributeLock {
     LockScope scope() default LockScope.Key;
+
     LockType lockType() default LockType.Fair;
+
     String prefix() default "Key:";
+
     String key();
+
     LockTimeoutStrategy lockTimeoutStrategy() default LockTimeoutStrategy.FAST_FAILURE;
+
     ReleaseTimeoutStrategy releaseTimeoutStrategy() default ReleaseTimeoutStrategy.NO_OPERATION;
 }

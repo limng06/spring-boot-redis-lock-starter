@@ -17,7 +17,6 @@ import org.springframework.boot.autoconfigure.redislock.lock.Lock;
 import org.springframework.boot.autoconfigure.redislock.lock.LockFacotry;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -49,9 +48,9 @@ public class RedisLockAspectConfig {
             if (logger.isWarnEnabled()) {
                 logger.warn("Timeout while acquiring Lock({})", lockInfo.getName());
             }
-
             distributeLock.lockTimeoutStrategy().handle(lockInfo, lock, point);
-
+        } else {
+            logger.info("get lock: " + lockInfo.getName());
         }
 
         currentThreadLock.get(curentLock).setLock(lock);
