@@ -1,5 +1,6 @@
 package org.springframework.boot.autoconfigure.redislock;
 
+import org.redisson.spring.starter.RedissonAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
@@ -11,7 +12,7 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @ConditionalOnProperty(prefix = RedisLockConfig.PREFIX, name = "enable", havingValue = "true", matchIfMissing = true)
-@AutoConfigureAfter(RedisAutoConfiguration.class)
+@AutoConfigureAfter(RedissonAutoConfiguration.class)
 @EnableConfigurationProperties(RedisLockConfig.class)
 @Import({RedisLockAspectConfig.class, RedisLockConfiguration.class})
 public class RedisLockAutoConfiguration {
